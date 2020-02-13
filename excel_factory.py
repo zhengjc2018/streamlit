@@ -1,17 +1,28 @@
 import os
 import xlrd
+import uuid
 from logger import log
 
 
 class ExcelFactory(object):
     """docstring for ExcelFactory"""
 
-    def __init__(self, files: list):
-        self.excels = dict()
-        self.check_file_exist(files)
+    _instance = {}
+
+    def __new__(cls, *args, **kw):
+        if not cls._instance.get(cls):
+            cls._instance[cls] = super().__new__(cls)
+        return cls._instance[cls]
+
+    def __init__(self, files):
+        self.excels = {}
+        self.files = []
 
         for i, file in enumerate(files):
-            self.excels[i] = xlrd.open_workbook(file)
+            # _ = str(uuid.uuid5(uuid.NAMESPACE_DNS, os.path.basename(i)))
+            _ = os.path.basename(file)
+            self.excels[_] = xlrd.open_workbook(file)
+            self.files.append(_)
 
     # 检查文件是否存在
     def check_file_exist(self, files: list):
@@ -33,6 +44,25 @@ class ExcelFactory(object):
 
     def get_col_data(self, file_no, sheet_no, col_no, start=0, end=None):
         return self.get_data(file_no, sheet_no, col_no, start, end, False)
+
+    def sum(self, file):
+        res = {}
+        for sheet in self.excels[file].sheets():
+            _ = {}
+            for i in range(sheet.ncols):
+                vals = sheet.col_values(i)
+                k = vals.pop(0)
+                v = [i if isinstance(i, (float, int)) else 0 for i in vals]
+                _[k] = {
+                    "total": sum(v),
+                    "avf": sum(v)/len(v),
+                    "min": min(v),
+                    "max": max(v),
+                }
+            res[sheet.name] = _
+
+        log.info(f"sum's data: {res}")
+        return res
 
     def run(self):
         pass

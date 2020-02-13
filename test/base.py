@@ -28,11 +28,13 @@ class TestCase(unittest.TestCase):
         pass
 
     def test_excel_function(self):
-        col_data = self.ex.get_col_data(0, 1, 2)
-        row_data = self.ex.get_row_data(0, 1, 2)
+        col_data = self.ex.get_col_data("test.xlsx", 1, 2)
+        row_data = self.ex.get_row_data("test.xlsx", 1, 2)
 
         assert col_data == ['成绩', 87.0, 89.0, 81.0, 90.0]
         assert row_data == ['bbbb', 13.0, 89.0, '跳啊']
+
+        log.info(self.ex.sum("test.xlsx"))
 
 
 if __name__ == '__main__':

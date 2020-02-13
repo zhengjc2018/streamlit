@@ -1,0 +1,1 @@
+start streamlit run run.py --server.port 5001
